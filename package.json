@@ -1,0 +1,10 @@
+{
+  "name": "crazy-lab",
+  "private": true,
+  "type": "module",
+  "scripts": { "prepare-model": "node prepare-model.mjs" },
+  "dependencies": {
+    "@huggingface/tokenizers": "0.2.0",
+    "onnxruntime-node": "1.21.0"
+  }
+}

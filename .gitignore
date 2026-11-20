@@ -1,0 +1,9 @@
+.env
+.env.*
+.beta-data/
+.public-data/
+.guide-model/
+node_modules/
+*.log
+Thumbs.db
+.DS_Store

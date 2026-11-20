@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: crazy-lab
+    runtime: node
+    plan: free
+    buildCommand: npm ci --ignore-scripts --no-audit --no-fund && npm run prepare-model && node --test test/public-guide.test.mjs
+    startCommand: node server.mjs --public-neural
+    healthCheckPath: /
+    envVars:
+      - key: NODE_VERSION
+        value: 24.x
+      - key: SKIP_INSTALL_DEPS
+        value: "true"
