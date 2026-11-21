@@ -3,11 +3,11 @@ import { checkedCrazySources, lookupCrazyAnswer, normalizeCrazyContext } from '.
 import { checkedLearningSources, lookupLearningAnswer, normalizeLearningContext } from './learning-guide.js';
 import { publicLesson, publicTurn, unknownPublicAnswer } from './public-guide.js';
 import { validExplanation } from './explain-policy.js';
+import { createBrowserGuide } from './browser-guide.js';
 
 const providerNames = { neural: 'Lab AI', flan: 'FLAN-T5', openai: 'OpenAI', gemini: 'Gemini' };
 const pagesBackup = location.origin === 'https://tairasset.github.io' &&
   location.pathname.startsWith('/crazy-lab-capstone/');
-const guideApiBase = pagesBackup ? 'https://crazy-lab.onrender.com/api/' : './api/';
 
 export function setupEnglishGuide(getContext, {
   title = 'Lab guide',
@@ -46,6 +46,9 @@ export function setupGuide(getContext) {
   const privacy = document.getElementById('guide-privacy');
   const styleOption = document.getElementById('guide-style-option');
   const style = document.getElementById('guide-style');
+  const browserGuide = pagesBackup && typeof Worker === 'function' && typeof WebAssembly === 'object'
+    ? createBrowserGuide(text => { status.textContent = text; })
+    : null;
   let previousTopic = '';
   let previousFact = -1;
   const log = document.getElementById('guide-log');
@@ -62,6 +65,7 @@ export function setupGuide(getContext) {
       'visitor-limit': 'question limit reached for now',
       'daily-limit': 'daily limit reached',
       'access-denied': 'access denied',
+      cancelled: 'on-device AI turned off',
       unavailable: 'unavailable',
       unconfigured: 'unavailable',
     },
@@ -74,7 +78,7 @@ export function setupGuide(getContext) {
   let connectionStatus = '';
   let statusRequest = 0;
   let checkingConnection;
-  const preferenceKey = 'crazy-lab-guide-provider';
+  const preferenceKey = pagesBackup ? 'crazy-lab-device-ai' : 'crazy-lab-guide-provider';
   let preference = '';
   try { preference = sessionStorage.getItem(preferenceKey) || ''; } catch {}
   function savePreference(choice) {
@@ -87,6 +91,10 @@ export function setupGuide(getContext) {
 
   function showSelectedMode() {
     styleOption.hidden = privateGuide || option.hidden || !online.checked || providerName !== providerNames.neural;
+    if (browserGuide) {
+      const size = online.checked && style.value === 'extract' ? 'about 48 MB' : 'up to about 145 MB';
+      privacy.textContent = `Your questions stay on this device. The first AI answer may download ${size}.`;
+    }
     if (busy) return;
     if (option.hidden) {
       status.textContent = connectionStatus;
@@ -94,7 +102,7 @@ export function setupGuide(getContext) {
     }
     if (!privateGuide) {
       status.textContent = online.checked
-        ? (style.value === 'explain' ? 'Ask a question, then try “Can you give me an example?”' : 'MiniLM finds a passage in the public study notes.')
+        ? browserGuide ? 'Ask a question to use on-device AI.' : (style.value === 'explain' ? 'Ask a question, then try “Can you give me an example?”' : 'MiniLM finds a passage in the public study notes.')
         : 'Study notes are on. Your questions stay in this browser.';
       return;
     }
@@ -108,7 +116,8 @@ export function setupGuide(getContext) {
     const bubble = document.createElement('div');
     bubble.className = `guide-message ${role}`;
     const author = document.createElement('small');
-    const displayMode = Object.hasOwn(providerNames, mode) ? providerNames[mode] : copy.reference;
+    const displayMode = browserGuide && mode === 'neural' ? 'MiniLM'
+      : Object.hasOwn(providerNames, mode) ? providerNames[mode] : copy.reference;
     author.textContent = role === 'user' ? copy.player : `Pip · ${displayMode}${reason ? ' · ' + reason : ''}`;
     const message = document.createElement('p');
     message.textContent = content;
@@ -133,6 +142,15 @@ export function setupGuide(getContext) {
   }
 
   async function showConnection() {
+    if (pagesBackup) {
+      providerName = browserGuide ? providerNames.neural : '';
+      online.checked = Boolean(browserGuide && preference === providerName);
+      option.hidden = privacy.hidden = !browserGuide;
+      option.lastChild.textContent = ' Use AI on this device';
+      connectionStatus = 'Study notes are available in this browser.';
+      showSelectedMode();
+      return;
+    }
     const request = ++statusRequest;
     const publicStatus = 'Pip can answer from the public study notes.';
     let message = 'Using study notes. Reopen the chat to check the AI connection.';
@@ -144,7 +162,7 @@ export function setupGuide(getContext) {
     option.hidden = privacy.hidden = true;
     showSelectedMode();
     try {
-      const response = await fetch(guideApiBase + 'guide-status', { cache: 'no-store', signal: AbortSignal.timeout(7000) });
+      const response = await fetch('./api/guide-status', { cache: 'no-store', signal: AbortSignal.timeout(7000) });
       if (response.status === 401) {
         if (request === statusRequest && preference !== 'local') savePreference('');
         message = 'Private Gemini beta · Sign in again to use Gemini. Built-in answers are available.';
@@ -181,7 +199,7 @@ export function setupGuide(getContext) {
   }
 
   async function fetchReply(payload, timeout) {
-    const response = await fetch(guideApiBase + 'guide', {
+    const response = await fetch('./api/guide', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
@@ -210,7 +228,8 @@ export function setupGuide(getContext) {
       return local;
     }
     try {
-      const result = await fetchReply({ question, context, ...(explain ? { style: 'explain', previousTopic, previousFact } : {}) }, 45000);
+      const payload = { question, context, ...(explain ? { style: 'explain', previousTopic, previousFact } : {}) };
+      const result = browserGuide ? await browserGuide.ask(payload) : await fetchReply(payload, 45000);
       const text = typeof result.text === 'string' ? result.text.trim() : '';
       previousTopic = lesson.topic;
       previousFact = Number.isInteger(result.fact) ? result.fact : -1;
@@ -228,7 +247,7 @@ export function setupGuide(getContext) {
       if (result.mode === 'local') return { ...local, reason: result.reason };
       return { ...local, reason: 'unavailable' };
     } catch (error) {
-      return { ...local, reason: error.message === 'access-denied' ? 'access-denied' : 'unavailable' };
+      return { ...local, reason: error.message === 'access-denied' || error.message === 'cancelled' ? error.message : 'unavailable' };
     }
   }
 
@@ -295,7 +314,12 @@ export function setupGuide(getContext) {
     pending.finally(() => { if (checkingConnection === pending) checkingConnection = undefined; });
   });
   online.addEventListener('change', () => {
-    if (!online.checked) onlineHistory = [];
+    if (!online.checked) {
+      onlineHistory = [];
+      browserGuide?.cancel();
+      previousTopic = '';
+      previousFact = -1;
+    }
     savePreference(online.checked ? providerName : 'local');
     showSelectedMode();
   });
