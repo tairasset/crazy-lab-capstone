@@ -1,0 +1,282 @@
+.rotate-phone {
+  position: absolute;
+  inset: 0;
+  z-index: 12;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: #0d1915ee;
+}
+.rotate-phone-card {
+  width: min(290px, 100%);
+  padding: 24px 18px;
+  border: 1px solid #5c7567;
+  border-radius: 14px;
+  background: #1b2c24;
+  text-align: center;
+}
+.rotate-phone-card h2 { margin: 13px 0 6px; color: #ffe2bf; font-size: 19px; }
+.rotate-phone-card p { margin: 0 0 14px; color: #c4d8c9; font-size: 14px; }
+.rotate-phone-card button {
+  min-height: 44px;
+  padding: 7px 12px;
+  border: 1px solid #789485;
+  border-radius: 8px;
+  background: #263e32;
+}
+.rotate-phone-icon {
+  display: block;
+  position: relative;
+  width: 31px;
+  height: 51px;
+  margin: 4px auto;
+  border: 2px solid #f4be97;
+  border-radius: 7px;
+  background: #15231d;
+  animation: rotate-handset 2.3s ease-in-out 3 both;
+}
+.rotate-phone-icon::after {
+  content: '';
+  position: absolute;
+  inset: 4px 9px auto;
+  height: 2px;
+  border-radius: 3px;
+  background: #f4be97;
+}
+@keyframes rotate-handset {
+  0%, 20% { transform: rotate(0); }
+  62%, 100% { transform: rotate(-90deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rotate-phone-icon { animation: none; transform: rotate(-90deg); }
+}
+
+.touch-stick, .fun-touch-menu-help, .fun-touch-menu-action { display: none; }
+
+@media (pointer: coarse) {
+  .touch-stick {
+    --stick-size: clamp(76px, 26dvh, 108px);
+    position: absolute;
+    display: grid;
+    place-items: center;
+    width: var(--stick-size);
+    height: var(--stick-size);
+    border: 1px solid #9db4a6b3;
+    border-radius: 50%;
+    background: #13241eb8;
+    touch-action: none;
+    user-select: none;
+    pointer-events: auto;
+  }
+  .touch-stick span {
+    width: 40%;
+    height: 40%;
+    border: 1px solid #c8e4d5;
+    border-radius: 50%;
+    background: #6b9784e8;
+    transform: translate(var(--stick-x, 0px), var(--stick-y, 0px));
+    pointer-events: none;
+  }
+  .touch-stick[data-moving] span { background: #abe1c9; }
+  .cx-hall .touch-stick { bottom: 12px; left: 12px; }
+
+  .game.fun-touch {
+    --touch-top: max(8px, env(safe-area-inset-top));
+    --touch-left: max(9px, env(safe-area-inset-left));
+    --touch-right: max(9px, env(safe-area-inset-right));
+    --touch-bottom: max(8px, env(safe-area-inset-bottom));
+    --touch-action-size: 45px;
+    --touch-action-gap: 4px;
+    --touch-deck-width: calc(var(--touch-action-size) * 4 + var(--touch-action-gap) * 3);
+  }
+  [data-mode="fun"] .game.fun-touch:is(:fullscreen, .fun-viewport-fullscreen) { height: 100dvh; min-height: 0; }
+  .game.fun-touch .location, .game.fun-touch .center { display: none; }
+  .fun-touch .fun-tools {
+    inset: var(--touch-top) var(--touch-right) auto var(--touch-left);
+    width: max-content;
+    max-width: calc(100% - var(--touch-right) - var(--touch-left));
+    flex-wrap: wrap;
+    z-index: 4;
+  }
+  .fun-touch .fun-tools button { min-height: 44px; touch-action: none; }
+  .fun-touch .fun-tools #fun-touch-start { background: #e7b58d; color: #241d17; font-weight: 750; }
+  .fun-touch .fun-combat-top {
+    position: absolute;
+    inset: var(--touch-top) var(--touch-right) auto auto;
+    width: 118px;
+    margin: 0;
+    padding: 5px 7px;
+    font-size: 11px;
+  }
+  .fun-touch .fun-shield-line { margin-top: 3px; gap: 3px; }
+  .fun-touch #fun-goal { margin-top: 2px; }
+  .fun-touch #fun-shield-value { min-width: 26px; }
+  .game.fun-touch:has(.fun-combat:not([hidden])) .fun-alarm {
+    top: calc(var(--touch-top) + 49px);
+    left: var(--touch-left);
+    max-width: calc(100% - var(--touch-left) - var(--touch-right));
+    padding: 3px 5px;
+    border: 0;
+    background: #421c18ce;
+    z-index: 4;
+  }
+  .fun-touch .fun-alarm :is(strong, span) { display: none; }
+  .fun-touch #fun-stop-siren { min-height: 44px; }
+  .fun-touch .fun-combat-input {
+    position: absolute;
+    display: block;
+    inset: 0;
+    padding: 0;
+    pointer-events: none;
+  }
+  .fun-touch .fun-movement { display: none; }
+  .fun-touch .touch-stick { bottom: var(--touch-bottom); left: var(--touch-left); }
+  .fun-touch .fun-offhand {
+    position: absolute;
+    right: var(--touch-right);
+    bottom: var(--touch-bottom);
+    width: var(--touch-deck-width);
+    max-width: none;
+    border: 0;
+    padding: 0;
+    background: transparent;
+    pointer-events: none;
+  }
+  .fun-touch #fun-prop-status { display: none; }
+  .fun-touch .fun-prop-actions {
+    grid-template-columns: repeat(4, var(--touch-action-size));
+    gap: var(--touch-action-gap);
+  }
+  .fun-touch .fun-prop-actions button {
+    min-height: 44px;
+    padding: 2px;
+    font-size: 11px;
+    background: #182b24ec;
+    pointer-events: auto;
+    touch-action: none;
+    user-select: none;
+  }
+  .fun-touch .fun-prop-actions button:disabled { opacity: .55; pointer-events: none; }
+  .fun-touch .fun-loadout { display: contents; }
+  .fun-touch .fun-arsenal-head { margin: 0; }
+  .fun-touch .fun-loadout :is(strong, .fun-throw-controls, .fun-loadout-tip, .fun-aim-help) { display: none; }
+  .fun-touch #fun-throw {
+    position: absolute;
+    bottom: calc(var(--touch-bottom) + 2 * (44px + var(--touch-action-gap)) + 3px);
+    right: var(--touch-right);
+    width: 70px;
+    height: 48px;
+    min-width: 0;
+    min-height: 44px;
+    border-radius: 14px;
+    pointer-events: auto;
+    touch-action: none;
+    user-select: none;
+  }
+  .fun-touch .fun-combat:has(.fun-combat-input:not([hidden])) .fun-hotbar {
+    top: auto;
+    bottom: var(--touch-bottom);
+    left: calc(var(--touch-left) + clamp(76px, 26dvh, 108px) + 8px);
+    right: calc(var(--touch-right) + var(--touch-deck-width) + 8px);
+    transform: none;
+    justify-content: start;
+    overscroll-behavior-x: contain;
+    touch-action: pan-x;
+    scrollbar-width: thin;
+  }
+  .fun-touch .fun-hotbar button {
+    min-height: 44px;
+    flex-basis: 46px;
+    overflow: hidden;
+    padding-inline: 2px;
+  }
+  .fun-touch .fun-hotbar button span { overflow: hidden; text-overflow: ellipsis; }
+  .fun-touch .fun-crosshair { display: block; pointer-events: none; }
+  .fun-touch .fun-combat:has(.fun-combat-input:not([hidden])) .fun-corner {
+    display: grid;
+    top: calc(var(--touch-top) + 54px);
+    bottom: auto;
+    left: 50%;
+    right: auto;
+    width: min(50%, 300px);
+    transform: translateX(-50%);
+    justify-items: center;
+    text-align: center;
+  }
+  .fun-touch .fun-combat:has(.fun-combat-input:not([hidden])) .fun-key-status { display: block; }
+  .fun-touch .fun-pause-menu {
+    z-index: 6;
+    top: calc(var(--touch-top) + 49px);
+    bottom: var(--touch-bottom);
+    transform: translateX(-50%);
+    width: min(390px, calc(100% - var(--touch-left) - var(--touch-right)));
+    max-height: none;
+    overscroll-behavior: contain;
+  }
+  .fun-touch.fun-menu-open .fun-hotbar {
+    display: flex;
+    z-index: 7;
+    top: auto;
+    bottom: var(--touch-bottom);
+    max-width: min(390px, calc(100% - var(--touch-left) - var(--touch-right)));
+    touch-action: pan-x;
+  }
+  .fun-touch.fun-menu-open:has(.fun-pause-menu:not([hidden])) .fun-pause-menu { bottom: calc(var(--touch-bottom) + 53px); }
+  .fun-touch.fun-menu-open:has(.fun-pause-menu[hidden]) :is(.fun-crosshair, .fun-hotbar) { display: none; }
+  .fun-touch .fun-touch-menu-help { display: block; color: #c9dbcf; font-size: 13px; line-height: 1.4; }
+  .fun-touch :is(.fun-key-menu-help, #fun-toggle-touch) { display: none; }
+  .fun-touch .fun-touch-menu-action { display: inline-flex; }
+  .fun-touch .fun-menu-actions :is(button, a),
+  .fun-touch .fun-pause-menu .fun-throw-controls button {
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
+  }
+  .fun-touch .fun-menu-actions a {
+    padding: 6px 8px;
+    border: 1px solid #62746a;
+    border-radius: 6px;
+    background: #18251f;
+    color: #f3efe4;
+    font-size: 12px;
+  }
+  .fun-touch .fun-combat-result { z-index: 5; }
+}
+
+@media (pointer: coarse) and (orientation: portrait) {
+  .fun-touch .fun-combat-top { top: calc(var(--touch-top) + 49px); }
+  .fun-touch .fun-combat:has(.fun-combat-input:not([hidden])) .fun-hotbar {
+    bottom: calc(var(--touch-bottom) + 2 * (44px + var(--touch-action-gap)) + 57px);
+    left: var(--touch-left);
+    right: var(--touch-right);
+  }
+  .fun-touch .fun-combat:has(.fun-combat-input:not([hidden])) .fun-corner {
+    top: calc(var(--touch-top) + 108px);
+    width: min(85%, 300px);
+  }
+}
+
+@media (pointer: coarse) and (orientation: landscape) and (max-height: 550px) {
+  #activity-main, .topbar, #exhibition-host, #exhibition-route, .explore-header {
+    padding-left: max(14px, env(safe-area-inset-left));
+    padding-right: max(14px, env(safe-area-inset-right));
+  }
+  :is([data-mode="learning"], [data-mode="palace"], [data-mode="crazy"]) #activity-main {
+    grid-template-columns: minmax(0, 1.13fr) minmax(240px, 1fr);
+  }
+  [data-mode="palace"] #palace-panel[data-science] { grid-row: auto; }
+  :is([data-mode="learning"], [data-mode="palace"], [data-mode="crazy"]) #game-scene {
+    position: sticky;
+    top: 8px;
+    min-height: clamp(230px, 88dvh, 476px);
+    border-radius: 10px;
+  }
+  #quarry-view:is(:fullscreen, .quarry-expanded) { height: 100dvh; }
+  #quarry-view:is(:fullscreen, .quarry-expanded) :is(.quarry-top, .quarry-bottom) {
+    left: max(9px, env(safe-area-inset-left));
+    right: max(9px, env(safe-area-inset-right));
+  }
+  #quarry-view:is(:fullscreen, .quarry-expanded) .quarry-bottom { bottom: max(8px, env(safe-area-inset-bottom)); }
+  #quarry-view:is(:fullscreen, .quarry-expanded) :is(.quarry-touch button, .quarry-view-tools button) { min-height: 43px; }
+  .cx-hall { height: clamp(230px, 75dvh, 440px); }
+}

@@ -1,0 +1,519 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#101e1b">
+  <title>Crazy Lab · Discover Copper</title>
+  <meta name="description" content="Learn chemistry and physics through hands-on play. Follow copper from a quarry into a powder lab and an exhibition of real uses.">
+  <script>
+    const route = new URLSearchParams(location.search);
+    const mission = route.get('mission');
+    const mode = route.get('mode');
+    const play = mission === 'crazy' && ['quarry', 'learning', 'palace', 'safety'].includes(mode)
+      ? mode : mission === 'crazy' ? 'fun' : 'copper';
+    document.documentElement.dataset.view = route.get('journey') === 'discover' && route.get('stage') === 'uses'
+      ? 'exhibition' : ['crazy', 'copper'].includes(mission) ? 'game' : 'home';
+    document.documentElement.dataset.play = play;
+  </script>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./palace.css">
+  <link rel="stylesheet" href="./quarry.css">
+  <link rel="stylesheet" href="./demo-guide.css">
+  <link rel="stylesheet" href="./journeys.css">
+  <link rel="stylesheet" href="./victory.css">
+  <link rel="stylesheet" href="./touch-play.css">
+  <script type="module" src="./entry.js"></script>
+</head>
+<body>
+  <header class="explore-header">
+    <a class="explore-brand" href="./" aria-label="Crazy Lab home"><span class="cu-mark" aria-hidden="true"><small>29</small>Cu</span>Crazy Lab</a>
+    <nav class="mode-switch" data-mode-nav aria-label="Game modes"></nav>
+    <div class="explore-tools">
+      <span class="release-label">Beta</span>
+      <button type="button" class="pitch-launch" id="pitch-start" hidden>Present</button>
+      <button type="button" class="home-demo" data-open-demo-guide>5-min demo</button>
+    </div>
+  </header>
+  <main id="explore-home" class="explore-home">
+    <p id="journey-finished" class="journey-finished" role="status" hidden>Congratulations!!! You’ve completed Discover Copper!</p>
+    <section class="discovery-card" aria-labelledby="discovery-title" data-chapter="Why Crazy Lab">
+      <div class="specimen-hero">
+        <div class="specimen-copy">
+          <p class="route-kicker">A virtual science lab</p>
+          <h1 id="discovery-title">See science<br><em>in action.</em></h1>
+          <p class="route-description">At school, I read about reactions I rarely got to see. I built Crazy Lab to make chemistry and physics easier to understand and more fun to learn.</p>
+          <a class="start-discovery" href="?mission=crazy&amp;mode=quarry&amp;journey=discover">Explore copper <span aria-hidden="true">→</span></a>
+        </div>
+        <small class="specimen-caption">Native copper · illustration</small>
+      </div>
+    </section>
+    <section class="pitch-journey" aria-labelledby="pitch-journey-title" data-chapter="Discover Copper">
+      <div class="pitch-intro">
+        <div><p class="pitch-label">Discover Copper</p><h2 id="pitch-journey-title">From rock to<br><em>copper powder.</em></h2></div>
+        <p>Play in your browser with Pip, your AI guide. You can also explore the lab and exhibition in VR with a compatible headset.</p>
+      </div>
+      <div class="pitch-triptych">
+        <a href="?mission=crazy&amp;mode=quarry&amp;journey=discover">
+          <img src="./pitch-quarry.webp" loading="lazy" decoding="async" width="650" height="360" alt="">
+          <h3>Mine the ore <span aria-hidden="true">↗</span></h3><p>Dig up copper ore and use three machines to turn it into a copper plate.</p>
+        </a>
+        <a href="?mission=crazy&amp;mode=learning&amp;journey=discover">
+          <img src="./pitch-lab.webp" loading="lazy" decoding="async" width="650" height="360" alt="">
+          <h3>Make the powder <span aria-hidden="true">↗</span></h3><p>Follow the process my grandfather helped invent. Switch on the tank and watch copper powder form in the reactor.</p>
+        </a>
+        <a href="?journey=discover&amp;stage=uses">
+          <img src="./pitch-exhibition.webp" loading="lazy" decoding="async" width="650" height="360" alt="">
+          <h3>Explore its uses <span aria-hidden="true">↗</span></h3><p>Run three exhibits to see what copper particles can do in electronics, 3D printing and moving parts.</p>
+        </a>
+      </div>
+    </section>
+    <section class="home-modes" aria-labelledby="home-modes-title" data-chapter="Two more ways to play">
+      <h2 id="home-modes-title">More ways to play</h2>
+      <div class="home-mode-grid">
+        <article class="home-mode" aria-labelledby="science-title">
+          <img class="home-mode-image" src="./chemistry-card.webp" alt="" width="1600" height="1000" loading="lazy" decoding="async">
+          <div class="home-mode-copy">
+            <h3 id="science-title">Chemistry Made Simple</h3>
+            <p>Switch on a tiny tank and tap the plate where bubbles appear. Each short experiment begins with something you can see.</p>
+            <a class="home-link" href="?mission=crazy&amp;mode=palace&amp;journey=science">Try the first experiment <span aria-hidden="true">→</span></a>
+          </div>
+        </article>
+        <article class="home-mode home-mode-fun" aria-labelledby="arcade-title">
+          <img class="home-mode-image" src="./fun-card.webp" alt="" width="1600" height="1000" loading="lazy" decoding="async">
+          <div class="home-mode-copy">
+            <h3 id="arcade-title">Fun Mode</h3>
+            <p>Set off the alarm and outlast three waves of security robots in the arcade lab.</p>
+            <a class="home-link" href="?mission=crazy">Play Fun Mode <span aria-hidden="true">→</span></a>
+          </div>
+        </article>
+      </div>
+    </section>
+  </main>
+  <dialog id="pitch-dialog" aria-label="Crazy Lab presentation">
+    <header class="pitch-bar"><span class="pitch-brand">Crazy Lab</span><button type="button" id="pitch-exit">Exit presentation</button></header>
+    <div class="pitch-stage" id="pitch-stage"></div>
+    <footer class="pitch-nav">
+      <div class="pitch-readout"><span id="pitch-position"></span><span id="pitch-name"></span></div>
+      <div class="pitch-buttons"><button type="button" id="pitch-prev">Previous</button><button type="button" id="pitch-next">Next</button></div>
+    </footer>
+  </dialog>
+  <nav id="exhibition-route" class="journey-nav" aria-label="Discover Copper stops"></nav>
+  <main id="exhibition-host"></main>
+  <header class="topbar game-header">
+    <a class="brand" href="./" aria-label="Crazy Lab home"><span class="symbol">Cu</span><div><strong id="brand-name">Crazy Lab</strong><span id="brand-detail" hidden></span></div></a>
+    <nav class="mode-switch" data-mode-nav aria-label="Game modes"></nav>
+    <nav id="lab-nav" aria-label="Laboratory rooms" class="chapters">
+      <button id="lab-tab" type="button" aria-current="step">Laboratory</button>
+      <button id="equipment-tab" type="button">Equipment</button>
+      <button id="gallery-tab" type="button">How it works</button>
+    </nav>
+    <div class="header-actions"><button id="guide-open" type="button">Ask the guide</button><button id="vr" type="button" hidden>Enter VR</button><button id="restart" type="button">Restart</button></div>
+  </header>
+  <main id="activity-main">
+    <section id="game-scene" class="game" aria-label="3D laboratory">
+      <div id="viewport" class="viewport"></div>
+      <div class="scene-overlay" aria-hidden="true"></div>
+      <div class="location"><span class="signal"></span><span id="location">Mission / Laboratory</span></div>
+      <button id="center" class="center" type="button" aria-label="Reset view" title="Reset view">Reset view</button>
+      <div id="scene-tip" class="scene-tip" hidden></div>
+      <div id="crazy-alarm" class="crazy-alarm" role="status" aria-live="polite" hidden>
+        <strong>Emergency shutdown</strong>
+        <span id="crazy-effect-label" hidden>Blast and smoke · simulated effect</span>
+      </div>
+      <div id="fun-alarm" class="fun-alarm" hidden>
+        <strong id="fun-alarm-title">Lab alarm</strong>
+        <span id="fun-alarm-note"></span>
+        <button id="fun-stop-siren" type="button" aria-keyshortcuts="M" hidden>Stop siren · M</button>
+      </div>
+      <section id="fun-combat" class="fun-combat" aria-label="Security encounter" hidden>
+        <div class="fun-tools">
+          <button id="fun-fullscreen" type="button">Fullscreen</button>
+          <button id="fun-touch-start" type="button" hidden>Start</button>
+          <button id="fun-look-lock" type="button" aria-pressed="false" hidden>Capture mouse</button>
+          <button id="fun-menu" type="button" aria-expanded="false" aria-controls="fun-pause-menu">Menu · N</button>
+          <button id="fun-pause" type="button" aria-expanded="false" aria-controls="fun-pause-menu">Pause · P</button>
+        </div>
+        <div class="fun-crosshair" aria-hidden="true">+</div>
+        <div class="fun-corner">
+          <output id="fun-key-status" class="fun-key-status" hidden></output>
+        </div>
+        <div id="fun-hotbar" class="fun-hotbar" role="group" aria-label="Inventory"></div>
+        <section id="fun-pause-menu" class="fun-pause-menu" aria-labelledby="fun-pause-title" hidden>
+          <h2 id="fun-pause-title">Paused</h2>
+          <div class="fun-camera-setting">
+            <label for="fun-camera-sensitivity">Camera sensitivity</label>
+            <output id="fun-camera-value" for="fun-camera-sensitivity">100%</output>
+            <input id="fun-camera-sensitivity" type="range" min="25" max="200" step="5" value="100">
+          </div>
+          <div class="fun-throw-controls fun-firearm-controls" role="group" aria-label="Firearms">
+            <button id="fun-sidearm" type="button" aria-pressed="false">Pistol</button>
+            <button id="fun-carbine" type="button" aria-pressed="false">Carbine</button>
+            <button id="fun-shotgun" type="button" aria-pressed="false">Shotgun</button>
+          </div>
+          <p class="fun-touch-menu-help">Move with the joystick. Drag the room to aim. Tap <strong>Grab</strong> near an object, then <strong>Place</strong> or <strong>Throw</strong>. Hold <strong>Fire</strong> with the carbine.</p>
+          <dl class="fun-key-menu-help">
+            <div><dt>Move / Jump</dt><dd>WASD or arrows / Space</dd></div>
+            <div><dt>Look</dt><dd>Scroll with two fingers over the room, drag, or choose Capture mouse. Esc or N frees the cursor.</dd></div>
+            <div><dt>Grab</dt><dd>Aim at a prop and press E. Both copper plates in the tank can be picked up and thrown again.</dd></div>
+            <div><dt>Robot parts</dt><dd>After they land, press E to pick one up and G to throw it.</dd></div>
+            <div><dt>Hold a box</dt><dd>Click when the green ring appears to place or stack. Aim into open space and click to throw.</dd></div>
+            <div><dt>Hold a chair</dt><dd>Click a chair to stack or aim and throw</dd></div>
+            <div><dt>Place / Toss / Drop</dt><dd>F / G / Z</dd></div>
+            <div><dt>Fire / Inventory slots</dt><dd>Click or X / 1–9</dd></div>
+            <div><dt>Melee</dt><dd>V within 2 m · Crowbar on the right workbench</dd></div>
+            <div><dt>Silence the alarm</dt><dd>Press M, select Stop siren, or shoot the red siren overhead.</dd></div>
+            <div><dt>Cycle weapons</dt><dd>Q</dd></div>
+            <div><dt>Browse inventory in menu</dt><dd>← / → or scroll</dd></div>
+            <div><dt>Swing copper plate or hammer / Gel</dt><dd>B / H</dd></div>
+            <div><dt>Start / Menu / Pause</dt><dd>R / N / P</dd></div>
+          </dl>
+          <div id="fun-upgrades" class="fun-throw-controls fun-upgrade-controls" role="group" aria-labelledby="fun-upgrades-title" hidden>
+            <p id="fun-upgrades-title">Palace upgrades</p>
+            <button id="fun-scatter-plus" type="button" aria-pressed="false" hidden>Scatter Nova</button>
+            <button id="fun-copper-plus" type="button" aria-pressed="false" hidden>Copper Surge</button>
+            <button id="fun-cryo-plus" type="button" aria-pressed="false" hidden>Deep Freeze</button>
+          </div>
+          <div class="fun-menu-actions">
+            <button id="fun-resume" type="button">Resume</button>
+            <button id="fun-toggle-touch" type="button" aria-controls="fun-combat-input" aria-expanded="false">Show on-screen controls</button>
+            <button id="fun-touch-splash" type="button" class="fun-touch-menu-action">Splash</button>
+            <button id="fun-touch-sound" type="button" class="fun-touch-menu-action" aria-pressed="true">Sound on</button>
+            <button id="fun-touch-view" type="button" class="fun-touch-menu-action">Reset view</button>
+            <button id="fun-touch-reset" type="button" class="fun-touch-menu-action">Reset arena</button>
+            <a class="fun-touch-menu-action" href="./">Back to Crazy Lab</a>
+          </div>
+        </section>
+        <div id="fun-combat-top" class="fun-combat-top" hidden>
+          <div class="fun-wave-line"><strong id="fun-wave"></strong><span id="fun-remaining"></span></div>
+          <div class="fun-shield-line"><label for="fun-shield">Shield</label><progress id="fun-shield" max="100" value="100"></progress><span id="fun-shield-value">100%</span></div>
+          <p id="fun-goal" class="fun-goal"></p>
+          <p id="fun-combat-message" class="visually-hidden" role="status"></p>
+        </div>
+        <div id="fun-combat-result" class="fun-combat-result" hidden>
+          <h2 id="fun-result-title"></h2>
+          <p id="fun-result-detail" hidden></p>
+          <button id="fun-replay" type="button">Play again</button>
+        </div>
+        <div id="fun-combat-input" class="fun-combat-input" hidden>
+          <div class="fun-utility">
+            <div class="fun-offhand" role="group" aria-label="Left hand and jump">
+              <p id="fun-prop-status" role="status">Aim at an item and press E to grab. G throws it.</p>
+              <div class="fun-prop-actions">
+                <button id="fun-grab" type="button" title="Grab (E)">Grab</button>
+                <button id="fun-place" type="button" title="Place or stack (F)" disabled>Place</button>
+                <button id="fun-toss" type="button" title="Toss (G)" disabled>Toss</button>
+                <button id="fun-drop" type="button" title="Drop (Z)" disabled>Drop</button>
+                <button id="fun-jump" type="button" title="Jump (Space)">Jump</button>
+                <button id="fun-hammer" type="button" title="Pick up or swing the hammer (B)">Hammer</button>
+                <button id="fun-melee" type="button" title="Melee (V)">Melee</button>
+                <button id="fun-gel" type="button" title="Pour fictional gel into the tank (H)">Gel</button>
+              </div>
+            </div>
+            <div id="fun-movement" class="fun-movement" role="group" aria-label="Move in the lab">
+              <button type="button" data-move="KeyW" aria-label="Move forward">↑</button>
+              <button type="button" data-move="KeyA" aria-label="Move left">←</button>
+              <button type="button" data-move="KeyS" aria-label="Move back">↓</button>
+              <button type="button" data-move="KeyD" aria-label="Move right">→</button>
+            </div>
+          </div>
+          <div id="fun-arsenal" class="fun-loadout" role="group" aria-label="Arsenal">
+            <div class="fun-arsenal-head"><strong>Arsenal</strong><button id="fun-throw" type="button">Fire</button></div>
+            <div class="fun-throw-controls" role="group" aria-label="Choose a weapon">
+              <button id="fun-training" type="button" aria-pressed="true">Training Orb</button>
+              <button id="fun-scatter" type="button" aria-pressed="false">Scatter Orb</button>
+              <button id="fun-copper" type="button" aria-pressed="false">Copper Pulse</button>
+              <button id="fun-cryo" type="button" aria-pressed="false">Freeze Orb</button>
+              <button id="fun-blaster" type="button" aria-pressed="false">Pulse Blaster</button>
+              <button id="fun-arc" type="button" aria-pressed="false">Arc Beam</button>
+            </div>
+            <p id="fun-loadout-tip" class="fun-loadout-tip">A basic burst. Always available.</p>
+            <p class="fun-aim-help"><span class="fun-touch-help">Tap the room to aim · Drag to look</span><span class="fun-key-help">WASD or arrows · Space jump · X fire · P pause</span></p>
+          </div>
+        </div>
+      </section>
+      <button id="scene-next" class="scene-next" type="button" hidden></button>
+      <div id="scene-help" class="scene-help"><span>Tap an object · Drag to look around</span><span class="desktop-help"> · WASD to move</span></div>
+    </section>
+    <aside id="palace-panel" class="mission palace-panel" aria-label="Knowledge Palace" hidden></aside>
+    <aside id="copper-panel" class="mission" aria-labelledby="mission-title">
+      <p class="eyebrow" id="kicker">Mission · First batch</p>
+      <h1 id="mission-title" tabindex="-1">Make copper powder</h1>
+      <ol id="lab-steps" class="lab-steps" aria-label="Steps to make copper powder">
+        <li aria-current="step">Tank</li><li>Separate</li><li>Reactor</li>
+      </ol>
+      <p id="mission-body" class="mission-body">The tank is quiet with the power off. Tap the power supply on the left and watch the two copper plates.</p>
+      <a id="palace-rewards-entry" class="reference-note palace-rewards-entry" href="?mission=crazy&amp;mode=palace" hidden>Try Palace experiments and earn rewards ↗</a>
+      <p id="exhibit-detail" class="exhibit-detail" hidden></p>
+      <p id="power-example" class="reference-note" hidden>A lab power supply often has a screen, knobs and places to connect wires. <a href="https://www.keysight.com/pl/en/assets/9018-04576/user-manuals/9018-04576.pdf#page=14" target="_blank" rel="noopener noreferrer">See an example in the Keysight manual</a>.</p>
+      <section id="sign-board" class="sign-board" aria-label="Charge counting cards" hidden>
+        <div id="signs-apart" class="sign-grid">
+          <div class="charge-card"><strong>Two plus signs</strong><div class="charge-counts" aria-hidden="true"><span class="positive">+</span><span class="positive">+</span></div></div>
+          <div class="charge-card"><strong>Two minus signs</strong><div class="charge-counts" aria-hidden="true"><span class="negative">−</span><span class="negative">−</span></div></div>
+        </div>
+        <div id="signs-paired" class="sign-grid" hidden>
+          <div class="charge-card"><strong>First pair</strong><div class="charge-counts" aria-label="Plus and minus add up to zero"><span class="positive">+</span><span class="negative">−</span><b>→ 0</b></div></div>
+          <div class="charge-card"><strong>Second pair</strong><div class="charge-counts" aria-label="Plus and minus add up to zero"><span class="positive">+</span><span class="negative">−</span><b>→ 0</b></div></div>
+        </div>
+      </section>
+      <section id="charge-board" class="charge-board" aria-label="Charge pairs in a copper atom" hidden>
+        <div class="charge-card">
+          <strong>Before</strong>
+          <div class="charge-pairs" aria-label="Two pairs with one plus and one minus each">
+            <span><b class="positive">+</b><b class="negative">−</b></span>
+            <span><b class="positive">+</b><b class="negative">−</b></span>
+          </div>
+          <span class="charge-caption">Balanced · charge 0</span>
+        </div>
+        <div id="charge-after" class="charge-card" hidden>
+          <strong>After</strong>
+          <div class="charge-pairs" aria-label="One pair and one extra plus">
+            <span><b class="positive">+</b><b class="negative">−</b></span>
+            <span><b class="positive">+</b><b class="missing-charge">□</b></span>
+          </div>
+          <span id="charge-result" class="charge-caption" hidden>One extra plus · charge +1</span>
+        </div>
+        <p>We draw two pairs here to show how charge works.</p>
+      </section>
+      <dl id="atom-path" class="lab-legend" aria-label="Where the electron and copper go at the anode" hidden>
+        <div><dt>Electron</dt><dd>Moves through the metal into the wire.</dd></div>
+        <div><dt>Copper ion</dt><dd>Moves into the water. Copper from the plate forms solid grains.</dd></div>
+      </dl>
+      <dl id="lab-legend" class="lab-legend plate-roles" aria-label="What each plate does" hidden>
+        <div><dt>Copper enters the water <span>Anode · +</span></dt><dd>Solid copper oxide grains collect at the bottom.</dd></div>
+        <div><dt>Bubbles rise <span>Cathode · −</span></dt><dd>Hydrogen gas forms bubbles. A tube carries the gas to the reactor.</dd></div>
+      </dl>
+      <p id="power-state" class="power-state" role="status" aria-live="polite" hidden></p>
+      <section id="reactor-card" class="reactor-card" aria-label="What happens in the reactor" hidden>
+        <div id="reactor-before">
+          <strong>What goes into the reactor?</strong>
+          <dl class="reactor-parts">
+            <div><dt>Hydrogen gas</dt><dd>Arrives through the tube.</dd></div>
+            <div><dt>Dry copper oxide grains</dt><dd>The grains contain copper joined to oxygen.</dd></div>
+          </dl>
+        </div>
+        <div id="reactor-after" hidden>
+          <strong>What comes out?</strong>
+          <dl class="reactor-parts">
+            <div><dt>Copper powder</dt><dd>Metallic copper stays in the tray.</dd></div>
+            <div><dt>Water</dt><dd>Hydrogen joins oxygen from the grains to make water.</dd></div>
+          </dl>
+        </div>
+      </section>
+      <section id="scale-note" class="scale-note" aria-label="Actual particle scale" hidden>
+        <span class="magnifier" aria-hidden="true">⌕</span>
+        <div><strong>Magnified view</strong><p>The patent example reports particles from 0.09 to 0.70 micrometres across. A micrometre is one thousandth of a millimetre. The game draws the particles much larger so you can see them.</p></div>
+      </section>
+      <div id="actions" class="actions" aria-label="Available actions"></div>
+      <div id="feedback" class="feedback" role="status" aria-live="polite" hidden></div>
+      <details id="lab-why" class="help">
+        <summary>What are the anode and cathode?</summary>
+        <div class="explain-plates">
+          <p><strong>The anode is the + plate in this tank.</strong> It supplies copper for the grains.</p>
+          <p><strong>The cathode is the − plate in this tank.</strong> Hydrogen bubbles form there.</p>
+        </div>
+        <div class="hint-buttons"><button id="learn-atom" type="button">Why does copper leave the plate?</button></div>
+      </details>
+      <details id="why-current" class="help">
+        <summary>Why turn on the power?</summary>
+        <p>Electric current is the movement of electric charge. The power supply keeps charge moving and drives changes at both plates. Copper leaves one plate and hydrogen bubbles form at the other.</p>
+        <p>Switch off the power to see what changes. The plates stop supplying copper and making new bubbles. The grains already in the tank stay at the bottom.</p>
+      </details>
+      <details id="why-salt" class="help">
+        <summary>What is in the tank?</summary>
+        <p>The tank holds water with dissolved table salt. Salt splits into charged pieces called ions. They can move through the water and carry charge between the plates.</p>
+        <div class="hint-buttons"><button id="learn-salt" type="button">Try the salt experiment</button></div>
+      </details>
+      <details id="why-pipe" class="help" hidden>
+        <summary>What does the tube do?</summary>
+        <ol class="pipe-map">
+          <li>The <strong>hood</strong> collects hydrogen above the right plate.</li>
+          <li>The <strong>tube</strong> carries the gas to the heated chamber.</li>
+          <li>The <strong>reactor</strong> uses the gas to turn copper oxide grains into copper. The grains arrive separately after filtering, rinsing and drying.</li>
+        </ol>
+      </details>
+      <details id="patent-apparatus" class="help" hidden>
+        <summary>What else is in the patent diagram?</summary>
+        <p>The tank has several pairs of copper plates. Hoods above the − plates collect gas. An outlet at the bottom lets the grains out. The reactor holds a powder tray. Excess gas can bubble through a water vessel after the reactor.</p>
+        <p>The patent text describes filtering, rinsing and drying. The game shows those steps at a single station. <a href="https://gosreestr.kazpatent.kz/Gosreestr/DownloadDescription?documentId=1614379#page=3" target="_blank" rel="noopener noreferrer">See Figure 1 of the patent</a>.</p>
+      </details>
+      <details class="help" id="help">
+        <summary>Need a hint?</summary>
+        <div class="hint-buttons"><button id="hint-ion" type="button">What is an ion?</button><button id="hint-powder" type="button">Where does the powder form?</button></div>
+        <button id="voice" class="voice" type="button" hidden>Ask by voice</button>
+        <p id="voice-note" class="voice-note" hidden>Say “What is an ion?” or “Where does the powder form?” Your browser may send audio to a speech recognition service. The game stores no audio or transcript.</p>
+        <p id="voice-status" class="voice-note" role="status" hidden></p>
+      </details>
+    </aside>
+    <aside id="learning-panel" class="mission learning-panel" aria-labelledby="learning-title" hidden>
+      <p class="eyebrow" id="learning-progress"></p>
+      <ol id="learning-route" class="learning-route" aria-label="Lab steps"></ol>
+      <div class="learning-instructions" aria-live="polite" aria-atomic="true">
+        <h1 id="learning-title"></h1>
+        <p id="learning-body" class="mission-body"></p>
+      </div>
+      <div class="actions">
+        <button id="learning-action" type="button" class="primary"></button>
+      </div>
+      <p id="learning-notice" class="reference-note" role="status" hidden></p>
+      <details id="learning-why" class="learning-details">
+        <summary>How it works</summary>
+        <p id="learning-detail"></p>
+      </details>
+      <details id="learning-glossary" class="learning-details">
+        <summary>Lab words</summary>
+        <dl>
+          <dt>Current</dt><dd>The movement of electric charge. In this tank, it drives changes at the plates.</dd>
+          <dt>Anode and cathode</dt><dd>The names of the two plates. Here, the anode supplies copper and the cathode is where hydrogen bubbles appear.</dd>
+          <dt>Copper oxide</dt><dd>A solid made of copper joined to oxygen. It forms the grains you collect from the tank.</dd>
+          <dt>Hydrogen</dt><dd>The gas in the bubbles. A tube carries it to the reactor.</dd>
+          <dt>Filter</dt><dd>A barrier with tiny openings. Liquid passes through and solid grains stay behind.</dd>
+          <dt>Reactor</dt><dd>A chamber where materials change. Here, hydrogen takes oxygen from the grains to make water, leaving copper behind.</dd>
+        </dl>
+      </details>
+    </aside>
+    <aside id="crazy-panel" class="mission crazy-panel" aria-labelledby="crazy-title" hidden>
+      <div class="crazy-progress">
+        <span id="crazy-stage"></span>
+        <span id="crazy-score"></span>
+      </div>
+      <h1 id="crazy-title" tabindex="-1"></h1>
+      <p id="crazy-setup" class="mission-body"></p>
+      <div id="crazy-options" class="crazy-options" aria-label="Choose A, B, C or D"></div>
+      <section id="crazy-feedback" class="crazy-feedback" aria-labelledby="crazy-result" hidden>
+        <h2 id="crazy-result" tabindex="-1"></h2>
+        <p id="crazy-outcome"></p>
+        <dl id="crazy-explanation"></dl>
+        <div id="crazy-sources" class="crazy-sources"></div>
+      </section>
+      <div class="actions crazy-controls">
+        <button id="crazy-continue" class="primary" type="button" hidden></button>
+      </div>
+      <p id="crazy-notice" class="reference-note" role="status" hidden></p>
+      <div class="crazy-sound">
+        <label><input id="crazy-sound" type="checkbox" checked> Alarm sound</label>
+      </div>
+    </aside>
+    <section id="fun-panel" class="fun-panel" aria-labelledby="fun-title" hidden>
+      <div class="fun-info">
+        <h1 id="fun-title">Fun Mode</h1>
+        <p id="fun-status" role="status" aria-live="polite">Hit a lab device or press Blast to call security.</p>
+      </div>
+      <div class="fun-actions" aria-label="Lab effects">
+        <button id="fun-blast" class="fun-blast" type="button">Blast</button>
+        <button id="fun-splash" class="fun-splash" type="button">Splash</button>
+        <button id="fun-reset" class="fun-reset" type="button">Reset</button>
+      </div>
+      <label class="fun-sound"><input id="fun-sound" type="checkbox" checked> Sound</label>
+      <p id="fun-fact" class="fun-fact" hidden></p>
+      <a id="fun-rewards-link" class="fun-rewards-link" href="?mission=crazy&amp;mode=palace">Unlock orbs in the Knowledge Palace</a>
+    </section>
+    <section id="quarry-game" class="quarry-game" aria-labelledby="quarry-title" hidden>
+      <div id="quarry-view" class="quarry-view">
+        <div id="quarry-viewport"></div>
+        <div class="quarry-crosshair" aria-hidden="true"></div>
+        <div class="quarry-top">
+          <div class="quarry-resources" aria-label="Inventory">
+            <div class="quarry-resource"><strong id="quarry-ore">0</strong> Ore</div>
+            <div class="quarry-resource"><strong id="quarry-concentrate">0</strong> Concentrate</div>
+            <div class="quarry-resource"><strong id="quarry-blister">0</strong> Blister copper</div>
+            <div class="quarry-resource"><strong id="quarry-copper">0</strong> Refined copper</div>
+          </div>
+          <div class="quarry-view-tools">
+            <button id="quarry-strike" class="quarry-button quarry-route-action" type="button" hidden>Strike the ore</button>
+            <a id="quarry-continue" class="quarry-button quarry-route-action" hidden>Enter the powder lab →</a>
+            <button id="quarry-point" class="quarry-button secondary" type="button">Show next step</button>
+            <button id="quarry-lock" class="quarry-button secondary" type="button" aria-pressed="false" title="Turn freely with a mouse or trackpad">Capture mouse</button>
+            <button id="quarry-fullscreen" class="quarry-button secondary" type="button" aria-pressed="false">Fullscreen</button>
+            <button class="quarry-button secondary quarry-screen-guide" data-open-demo-guide type="button">5-min demo</button>
+            <details id="quarry-menu" class="quarry-menu" hidden>
+              <summary>Menu</summary>
+              <div class="quarry-menu-content"></div>
+            </details>
+          </div>
+          <p id="quarry-view-objective" class="quarry-view-objective">Mine 3 copper ore blocks</p>
+        </div>
+        <div class="quarry-bottom">
+          <p id="quarry-aim"></p>
+          <div id="quarry-hotbar" class="quarry-hotbar" role="group" aria-label="Tools and building blocks"></div>
+          <div class="quarry-touch">
+            <div class="quarry-touch-actions">
+              <button id="quarry-jump" type="button">Jump</button>
+              <button id="quarry-use" type="button">Use</button>
+            </div>
+          </div>
+        </div>
+        <p id="quarry-no-webgl" class="quarry-no-webgl" hidden>This mode needs WebGL. Open the game in a browser with graphics acceleration.</p>
+      </div>
+      <div class="quarry-side">
+        <h1 id="quarry-title">Copper Quarry</h1>
+        <ol class="quarry-step" aria-label="Production stages">
+          <li data-stage="mine">Mine</li>
+          <li data-stage="concentrate">Concentrate</li>
+          <li data-stage="smelt">Smelt</li>
+          <li data-stage="refine">Refine</li>
+        </ol>
+        <div class="quarry-card">
+          <h2 id="quarry-objective">Mine 3 copper ore blocks</h2>
+          <p id="quarry-story">Colored flecks mark ore in this game. Strike the same block twice with your pickaxe.</p>
+          <progress id="quarry-progress" aria-label="Processing progress" max="1" value="0" hidden></progress>
+          <p id="quarry-status" role="status" hidden></p>
+        </div>
+        <section id="quarry-field" class="quarry-field" aria-label="Quarry field notes">
+          <div aria-live="polite" aria-atomic="true">
+            <h2 id="quarry-fact-title"></h2>
+            <p id="quarry-fact-text"></p>
+          </div>
+          <div class="quarry-fact-links">
+            <a id="quarry-fact-source" target="_blank" rel="noopener noreferrer">USGS field note ↗</a>
+            <button id="quarry-more-facts" type="button" hidden>Another field note</button>
+          </div>
+        </section>
+        <div class="quarry-actions">
+          <button id="quarry-home" class="quarry-button secondary" type="button">Return to trail</button>
+          <button id="quarry-reset" class="quarry-button secondary" type="button">Reset quarry</button>
+        </div>
+        <details id="quarry-help">
+          <summary>Controls and process</summary>
+          <p class="quarry-touch-help">Walk with the joystick and drag the scene to look. Tap a block or use the action button. Select a block from your slots to build with it.</p>
+          <p class="quarry-key-help"><strong>WASD / arrows</strong> move · <strong>Space</strong> jump · <strong>1</strong> pickaxe · <strong>2–5</strong> building blocks. <strong>Click / E</strong> mines or places the selected block.</p>
+          <p class="quarry-key-help">Drag the scene to look around. Choose <strong>Capture mouse</strong> to turn freely with a mouse or trackpad. Press <strong>N</strong> or <strong>Esc</strong> to free the cursor.</p>
+          <p><strong>Show next step</strong> points toward the next ore block or station. When the copper is ready, select <strong>Enter the powder lab</strong> when you want to leave.</p>
+          <p>For one common route, copper sulfide ore is mined and concentrated, then smelted and electrolytically refined. The demo compresses these steps into three stations. <a href="https://www.usgs.gov/centers/national-minerals-information-center/copper-statistics-and-information" target="_blank" rel="noopener noreferrer">USGS copper overview</a></p>
+        </details>
+      </div>
+    </section>
+  </main>
+  <dialog id="guide-dialog" aria-labelledby="guide-title">
+    <div class="guide-head">
+      <div><p class="eyebrow">Game help</p><h2 id="guide-title">Lab guide</h2></div>
+      <form method="dialog"><button type="submit" aria-label="Close chat">Close</button></form>
+    </div>
+    <p id="guide-lead" class="guide-lead">Ask about a word, a device or your next step.</p>
+    <div class="guide-prompts" aria-label="Suggested questions">
+      <button type="button" data-question="What do I do next?">What do I do next?</button>
+      <button type="button" data-question="Why do we need two copper plates?">Why two plates?</button>
+      <button type="button" data-question="What does the tube do?">What does the tube do?</button>
+      <button type="button" data-question="How does the reactor work?">How does the reactor work?</button>
+    </div>
+    <div id="guide-log" class="guide-log" role="log" aria-label="Chat with the lab guide" aria-live="polite"></div>
+    <p id="guide-status" class="guide-status" role="status">Reference mode · offline</p>
+    <label id="guide-online-option" class="guide-option" hidden><input id="guide-online" type="checkbox"> Use online AI for replies</label>
+    <label id="guide-style-option" hidden>Answer style
+      <select id="guide-style">
+        <option value="explain">Explain with FLAN-T5</option>
+        <option value="extract">Find a passage with MiniLM</option>
+      </select>
+    </label>
+    <p id="guide-privacy" class="guide-status" hidden></p>
+    <form id="guide-form" class="guide-form">
+      <label class="visually-hidden" for="guide-input">Your question</label>
+      <input id="guide-input" name="question" type="text" maxlength="400" required placeholder="Type a question…" autocomplete="off" autofocus>
+      <button id="guide-send" type="submit">Send</button>
+    </form>
+  </dialog>
+  <footer><span id="footer-detail">Training simulation · Simplified animation</span><a id="footer-source" href="https://gosreestr.kazpatent.kz/Gosreestr/DownloadDescription?documentId=1614379" target="_blank" rel="noopener noreferrer">Patent KZ B 32204 ↗</a></footer>
+  <noscript>Enable JavaScript to play.</noscript>
+</body>
+</html>
